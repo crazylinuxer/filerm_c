@@ -1,7 +1,7 @@
 #include "include/filerm.h"
-#include "include/dynamic_array.h"
 #include <string.h>
 #include <regex.h>
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -17,6 +17,61 @@ void exit_on_syntax_error(void)
     printf("\n");
     print_help();
     exit(1);
+}
+
+char* join_path(const char* path1, const char* path2)
+{
+    while (*path2 == '/')
+    {
+        path2++;
+    }
+    char* dest = malloc(strlen(path1) + strlen(path2));
+    if (!dest)
+    {
+        fprintf(stderr, "%s", "An error occurred while allocating memory! Exiting\n");
+        exit(1);
+    }
+    strcpy(dest, path1);
+    for (char* searcher = dest + strlen(path1) - 1; searcher >= path1 && *searcher == '/'; searcher--)
+    {
+        *searcher = 0;
+    }
+    strcat(dest, "/");
+    strcat(dest, path2);
+
+    return dest;
+}
+
+dynamic_array* append_if_not_hidden(const char* directory, const char* file, bool allow_hidden, dynamic_array* array)
+{
+    if (file[0] != '.' || allow_hidden)
+    {
+        return array_append_value(array, join_path(directory, file));
+    }
+    return array;
+}
+
+dynamic_array* append_files(const char* directory, dynamic_array* files, dynamic_array* array, parameters params)
+{
+    for (int i = 0; i < array_get_size(files); i++)
+    {
+        const char* file = *array_get_by_index(files, i);
+        if (params.pattern)
+        {
+            regex_t pattern;
+            if (!regcomp(&pattern, params.pattern, 0))
+            {
+                fprintf(stderr, "%s", "Incorret pattern given! Exiting\n");
+                exit(1);
+            }
+            if (regexec(&pattern, file, 0, NULL, 0))
+            {
+                return array;
+            }
+        }
+        array = append_if_not_hidden(directory, file, params.hidden, array);
+    }
+    return array;
 }
 
 
@@ -59,15 +114,15 @@ int main(int argc, char** argv)
                 {
                     params.help = true;
                 }
-                if (!strcmp(argv[param], "--recursively"))
+                else if (!strcmp(argv[param], "--recursively"))
                 {
                     params.recursively = true;
                 }
-                if (!strcmp(argv[param], "--hidden"))
+                else if (!strcmp(argv[param], "--hidden"))
                 {
                     params.hidden = true;
                 }
-                if (!strcmp(argv[param], "--pattern"))
+                else if (!strcmp(argv[param], "--pattern"))
                 {
                     if (param >= argc - 1)
                     {
@@ -82,6 +137,10 @@ int main(int argc, char** argv)
                     {
                         exit_on_syntax_error();
                     }
+                }
+                else if (param < argc - 1)
+                {
+                    exit_on_syntax_error();
                 }
             }
             else
@@ -135,6 +194,8 @@ int main(int argc, char** argv)
         exit(0);
     }
 
+
+    array_delete_each(files_to_delete);
     array_delete(files_to_delete);
     return 0;
 }

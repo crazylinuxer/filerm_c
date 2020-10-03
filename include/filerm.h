@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include "dynamic_array.h"
 
 typedef struct
 {
@@ -12,6 +13,15 @@ parameters;
 
 void print_help(void);
 void exit_on_syntax_error(void);
+
+// This function returns ptr to allocated memory that needs to be freed later
+char* join_path(const char* path1, const char* path2);
+
+// Append file to an array, checking if it is hidden
+dynamic_array* append_if_not_hidden(const char* directory, const char* file, bool allow_hidden, dynamic_array* array);
+
+// Append multiple files to an array, checking if they are hidden and match pattern
+dynamic_array* append_files(const char* directory, dynamic_array* files, dynamic_array* array, parameters params);
 
 
 const char* help = R"(filerm.py - utility that removes only files but does not affect directories
