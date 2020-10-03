@@ -1,8 +1,9 @@
 extern realloc
 extern free
 extern posix_memalign
-
 extern exit
+
+extern check_pointer_after_malloc
 
 global array_init              ;*initializes dynamic array
 global array_delete            ;deletes dynamic array
@@ -96,6 +97,7 @@ segment .text
             shl rdi, LOG2_ITEM_SIZE
             add rdi, dynamic.data
             add rdi, [rsp]
+            mov rdi, [rdi]
             push rcx
             call free
             pop rcx
@@ -127,16 +129,10 @@ segment .text
             mov [rdi+dynamic.allocated], rsi
             shl rsi, LOG2_ITEM_SIZE
             call realloc
-            cmp rax, 0
-            jne realloc_ok
-                mov rax, 1
-                mov rdi, 0
-                mov rsi, alloc_error
-                mov rdx, alloc_error_len
-                syscall
-                mov edi, 1
-                call exit
-            realloc_ok:
+            
+            mov rdi, rax
+            call check_pointer_after_malloc
+
             jmp exit_check_space
         enough_space:
             mov rax, rdi
@@ -262,19 +258,38 @@ segment .text
         mov rcx, rdx
         push rsi
         push rdi
-        push rcx
+        push rdx
         mov rsi, rdx
         add rsi, [rdi+dynamic.allocated]
-        call realloc
+
+        shr rsi, 1
+        jnc not_incrementing
+            inc rsi
+        not_incrementing:
+        shl rsi, 1
+
+        mov rax, rdi
+        mov rcx, [rdi+dynamic.allocated]
+        sub rcx, 2
+        sub rcx, [rdi+dynamic.length]
+        cmp rcx, rdx
+        jnl not_reallocating
+            mov [rdi+dynamic.allocated], rsi
+            shl rsi, LOG2_ITEM_SIZE
+            call realloc
+        not_reallocating:
+
         pop rcx
-        pop rdi
+        add rsp, 8
         pop rsi
         push rax
+        mov rdi, rax
 
         mov r8, [rdi+dynamic.length]
         mov r9, r8
         add r8, rcx
         mov [rdi+dynamic.length], r8
+        shl r9, LOG2_ITEM_SIZE
 
         add rdi, r9
         add rdi, dynamic.data
