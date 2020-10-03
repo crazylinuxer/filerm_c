@@ -5,8 +5,8 @@ typedef struct
     bool help;
     bool recursively;
     bool hidden;
-    char* pattern;
-    char* directory;
+    const char* pattern;
+    const char* directory;
 }
 parameters;
 
