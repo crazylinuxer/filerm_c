@@ -11,6 +11,7 @@ void print_help(void)
     printf("%s", help);
 }
 
+
 void exit_on_syntax_error(void)
 {
     fprintf(stderr, "%s", "Invalid command line parameters detected!\n");
@@ -18,6 +19,7 @@ void exit_on_syntax_error(void)
     print_help();
     exit(1);
 }
+
 
 void* check_pointer_after_malloc(void* ptr)
 {
@@ -28,6 +30,7 @@ void* check_pointer_after_malloc(void* ptr)
     }
     return ptr;
 }
+
 
 char* join_path(const char* path1, const char* path2)
 {
@@ -51,6 +54,7 @@ char* join_path(const char* path1, const char* path2)
 
     return dest;
 }
+
 
 dynamic_array* list_files_of_type(const char* directory, parameters params, uint8_t type)
 {
@@ -98,10 +102,12 @@ dynamic_array* list_files_of_type(const char* directory, parameters params, uint
     return result;
 }
 
+
 dynamic_array* list_directories(const char* directory, parameters params)
 {
     return list_files_of_type(directory, params, 4);
 }
+
 
 dynamic_array* list_files(const char* directory, parameters params)
 {
@@ -130,6 +136,7 @@ dynamic_array* list_files_recursively(const char* directory, dynamic_array* resu
     
     return result;
 }
+
 
 void print_array_of_strings(dynamic_array* array)
 {

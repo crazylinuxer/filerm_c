@@ -39,7 +39,7 @@ void print_array_of_strings(dynamic_array*);
 const char* help = R"(filerm.py - utility that removes only files but does not affect directories
 
 usage:
-    python3 filerm.py [-rhi] [-p PATTERN] [DIRECTORY]
+    filerm [-rhi] [-p PATTERN] [DIRECTORY]
 
     DIRECTORY is "./" by default
 
