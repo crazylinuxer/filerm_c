@@ -3,3 +3,4 @@ filerm
 *.o
 *.deb
 package/usr/sbin
+.vscode
