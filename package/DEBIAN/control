@@ -1,0 +1,6 @@
+Package: filerm-c
+Version: 1.0
+Section: utils
+Architecture: amd64
+Maintainer: Roman <kvirikroma@gmail.com>
+Description: Utility that removes only files but does not affect directories
